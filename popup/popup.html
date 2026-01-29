@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autro Scroller</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Autro Scroller</h1>
+            <div id="status" class="status-indicator"></div>
+        </header>
+
+        <main>
+            <section class="control-group">
+                <label for="autoScrollToggle" class="switch-label">
+                    <span>Auto-Scroll Enabled</span>
+                    <div class="switch">
+                        <input type="checkbox" id="autoScrollToggle">
+                        <span class="slider round"></span>
+                    </div>
+                </label>
+            </section>
+
+            <section class="control-group">
+                <label for="scrollDelay">
+                    <span>Scroll Delay (seconds)</span>
+                    <input type="number" id="scrollDelay" min="1" max="10" value="2" step="0.5">
+                </label>
+            </section>
+        </main>
+
+        <footer>
+            <p id="footerStatus">Ready to scroll</p>
+        </footer>
+    </div>
+    <script type="module" src="popup.js"></script>
+</body>
+</html>
