@@ -6,13 +6,20 @@
       this.currentVideo = null;
       this.onEndCallback = null;
       this.hasTriggeredForCurrentVideo = false;
-      this.handleVideoEnd = () => {
+      this.handleVideoEnd = (event) => {
+        if (event.target !== this.currentVideo) {
+          return;
+        }
         if (!this.hasTriggeredForCurrentVideo && this.onEndCallback) {
+          console.log("Autro Scroller: Video ended (event)");
           this.hasTriggeredForCurrentVideo = true;
           this.onEndCallback();
         }
       };
-      this.handleTimeUpdate = () => {
+      this.handleTimeUpdate = (event) => {
+        if (event.target !== this.currentVideo) {
+          return;
+        }
         if (!this.currentVideo || !this.onEndCallback || this.hasTriggeredForCurrentVideo) {
           return;
         }
@@ -20,12 +27,11 @@
           return;
         }
         if (this.isOverlayPresent()) {
-          console.log("Autro Scroller: Overlay detected, pausing auto-scroll");
           return;
         }
         const video = this.currentVideo;
-        if (video.duration > 0 && video.currentTime > video.duration - 0.25) {
-          console.log("Autro Scroller: Video nearing end (loop detection)");
+        if (video.duration > 0 && video.currentTime > video.duration - 0.75) {
+          console.log("Autro Scroller: Video nearing end (loop detection)", video.currentTime.toFixed(2), "/", video.duration.toFixed(2));
           this.hasTriggeredForCurrentVideo = true;
           this.onEndCallback();
         }
@@ -61,6 +67,11 @@
      * Observes a video element for the end of playback.
      */
     observeVideo(video, callback) {
+      if (this.currentVideo === video) {
+        return;
+      }
+      this.cleanup();
+      console.log("Autro Scroller: locking onto new video", video);
       this.currentVideo = video;
       this.onEndCallback = callback;
       this.hasTriggeredForCurrentVideo = false;
@@ -95,47 +106,74 @@
     /**
      * Executes a scroll to the next Reel.
      * @param delayMs Optional delay in milliseconds before scrolling.
+     * @param contextElement Optional element (e.g. the video) to use as a context for finding the scroll container.
      */
-    scrollNext(delayMs = 0) {
+    scrollNext(delayMs = 0, contextElement) {
       this.cancelPendingScroll();
       if (delayMs > 0) {
         this.timeoutId = window.setTimeout(() => {
-          this.performScroll();
+          this.performScroll(contextElement);
         }, delayMs);
       } else {
-        this.performScroll();
+        this.performScroll(contextElement);
       }
     }
-    performScroll() {
-      console.log("Autro Scroller: Performing scroll action (Aggressive Search)...");
+    performScroll(contextElement) {
+      console.log("Autro Scroller: Performing scroll action...");
       if (document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement) {
         console.log("Autro Scroller: Input focused, blurring to allow scroll");
         document.activeElement.blur();
       }
       window.focus();
-      document.body.focus();
-      if (this.clickNextButton()) {
-        console.log("Autro Scroller: Clicked next button");
-        return;
+      if (document.body) {
+        document.body.focus();
       }
-      const allDivs = document.querySelectorAll("div");
-      let scrolled = false;
-      for (let i = 0; i < allDivs.length; i++) {
-        const el = allDivs[i];
-        if (el.scrollHeight > el.clientHeight && el.clientHeight > 0) {
+      let actionTaken = false;
+      const keyOptions = {
+        key: "ArrowDown",
+        code: "ArrowDown",
+        keyCode: 40,
+        which: 40,
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        view: window
+      };
+      document.dispatchEvent(new KeyboardEvent("keydown", keyOptions));
+      document.dispatchEvent(new KeyboardEvent("keyup", keyOptions));
+      let startNode = null;
+      if (contextElement && contextElement.isConnected) {
+        startNode = contextElement;
+      } else {
+        const centerElement = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
+        startNode = centerElement;
+      }
+      if (startNode) {
+        let el = startNode;
+        while (el && el !== document.body) {
           const style = window.getComputedStyle(el);
-          if (style.overflowY === "auto" || style.overflowY === "scroll" || style.overflowY === "visible") {
-            if (el.clientHeight > window.innerHeight * 0.5) {
-              console.log("Autro Scroller: Found likely scroll container:", el.className);
-              el.scrollBy({ top: el.clientHeight, behavior: "smooth" });
-              el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", code: "ArrowDown", bubbles: true }));
-              scrolled = true;
-            }
+          const overflowY = style.overflowY;
+          const isScrollable = (overflowY === "auto" || overflowY === "scroll") && el.scrollHeight > el.clientHeight;
+          if (isScrollable) {
+            console.log("Autro Scroller: Found scroll container:", el.className);
+            el.scrollBy({ top: el.clientHeight, behavior: "smooth" });
+            el.focus({ preventScroll: true });
+            el.dispatchEvent(new KeyboardEvent("keydown", keyOptions));
+            el.dispatchEvent(new KeyboardEvent("keyup", keyOptions));
+            actionTaken = true;
+            break;
           }
+          el = el.parentElement;
         }
       }
-      if (!scrolled) {
-        console.log("Autro Scroller: No scrollable divs found, forcing window scroll");
+      if (!actionTaken) {
+        if (this.clickNextButton()) {
+          console.log("Autro Scroller: Clicked next button");
+          actionTaken = true;
+        }
+      }
+      if (!actionTaken) {
+        console.log("Autro Scroller: No specific container found, using window scroll");
         window.scrollBy({ top: window.innerHeight, behavior: "smooth" });
       }
     }
@@ -226,7 +264,7 @@
     if (video) {
       detector.observeVideo(video, () => {
         console.log("Autro Scroller: Video ended, scrolling in", scrollDelay, "ms");
-        scroller.scrollNext(scrollDelay);
+        scroller.scrollNext(scrollDelay, video);
         setTimeout(() => {
           detector.cleanup();
           startObserving();
