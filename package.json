@@ -1,0 +1,23 @@
+{
+  "name": "autro-scroller",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc --noEmit && esbuild src/content/index.ts --bundle --outfile=dist/content/index.js --platform=browser --target=es2020 && esbuild src/popup/popup.ts --bundle --outfile=dist/popup/popup.js --platform=browser --target=es2020 && copyfiles -u 1 \"src/**/*.html\" \"src/**/*.css\" dist && copyfiles manifest.json dist && copyfiles -u 0 \"icons/**/*\" dist",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/chrome": "^0.1.36",
+    "@vitest/coverage-v8": "^4.0.18",
+    "copyfiles": "^2.4.1",
+    "esbuild": "^0.27.2",
+    "happy-dom": "^20.4.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
