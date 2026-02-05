@@ -22,34 +22,35 @@
 
 ---
 
-## 📦 How to Install (The Noob-Friendly Guide)
+## 📦 Installation (Developer Guide)
 
-Follow these simple steps to get the **AutoDoom Scroller** running on your browser. You don't need to be a coder!
+Follow these steps to build and run the **AutoDoom Scroller** from source.
 
-### Step 1: Get the Code
-You have two options. Choose the one that sounds easier:
+### Step 1: Clone the Repository
+Open your terminal and run:
+```bash
+git clone https://github.com/JohnySir/Auto-Instagram-Doom-Scroller-For-PC.git
+cd Auto-Instagram-Doom-Scroller-For-PC
+```
 
-*   **Option A: The "Download" Method (Easiest)**
-    1.  Scroll to the top of this GitHub page.
-    2.  Click the green **<> Code** button.
-    3.  Select **Download ZIP**.
-    4.  Find the downloaded file on your computer and **Unzip/Extract** it to a folder you can easily find (like your Desktop or Documents).
+### Step 2: Install Dependencies & Build
+You will need [Node.js](https://nodejs.org/) installed on your system.
+1.  **Install the necessary packages:**
+    ```bash
+    npm install
+    ```
+2.  **Compile the extension:**
+    ```bash
+    npm run build
+    ```
+    This command generates a `dist` folder containing the bundled code and assets.
 
-*   **Option B: The "Hacker" Method (Git)**
-    1.  Open your terminal or command prompt.
-    2.  Run this command:
-        ```bash
-        git clone https://github.com/JohnySir/Auto-Instagram-Doom-Scroller-For-PC.git
-        ```
-
-### Step 2: Load into Chrome
-1.  Open the Google Chrome browser.
-2.  In the address bar, type `chrome://extensions` and hit Enter.
-3.  **Crucial Step:** Look at the top-right corner and turn on the switch that says **Developer mode**.
-4.  A new menu will appear. Click the button that says **Load unpacked**.
-5.  Navigate to the folder you just downloaded (or unzipped).
-    *   *Note:* Select the **`dist`** folder inside if you see one. If not, select the main folder containing `manifest.json`.
-6.  **Success!** You should now see "AutoDoom Scroller" in your list of extensions.
+### Step 3: Load into Chrome
+1.  Open Google Chrome and navigate to `chrome://extensions`.
+2.  In the top-right corner, toggle **Developer mode** to **ON**.
+3.  Click the **Load unpacked** button.
+4.  Navigate to your project directory and select the **`dist`** folder.
+5.  **Success!** "AutoDoom Scroller" is now active in your browser.
 
 ---
 
